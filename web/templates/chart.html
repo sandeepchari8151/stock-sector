@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SectorScope – Chart: {{ name or symbol }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+      .dropdown-item label {
+        cursor: pointer;
+        margin: 0;
+        padding: 0.5rem 1rem;
+        width: 100%;
+      }
+      .dropdown-item input[type="checkbox"] {
+        margin-right: 0.5rem;
+      }
+      .dropdown-item:hover {
+        background-color: var(--bs-gray-100);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="SectorScope" style="height:24px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="/sectors">Sectors</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stocks</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/stocks/IT">IT</a></li>
+                <li><a class="dropdown-item" href="/stocks/Pharma">Pharma</a></li>
+                <li><a class="dropdown-item" href="/stocks/Banking">Banking</a></li>
+                <li><a class="dropdown-item" href="/stocks/FMCG">FMCG</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/patterns">Pattern Guide</a></li>
+          </ul>
+          
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <h2 class="section-title">Real-Time Chart & Pattern Analysis</h2>
+      <p class="subtle">Analyze live market patterns and get actionable trading insights for {{ name or symbol }} ({{ symbol }}).</p>
+
+      <!-- Symbol Selection -->
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Market Scanner</div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label" data-bs-toggle="tooltip" title="Ticker of the stock or ETF you want to analyze (e.g., AAPL, TSLA)">Symbol</label>
+                  <input type="text" id="symbolInput" class="form-control" placeholder="AAPL" value="{{ symbol }}">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" data-bs-toggle="tooltip" title="The candle duration for each bar (e.g., 1 minute, 1 hour, 1 day)">Timeframe</label>
+                  <select id="timeframeSelect" class="form-select">
+                    <option value="1m">1 Minute</option>
+                    <option value="5m">5 Minutes</option>
+                    <option value="15m">15 Minutes</option>
+                    <option value="30m">30 Minutes</option>
+                    <option value="1h">1 Hour</option>
+                    <option value="1d" selected>1 Day</option>
+                    <option value="1wk">1 Week</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" data-bs-toggle="tooltip" title="How much history to load for the chart and indicators">
+                    Period
+                  </label>
+                  <select id="periodSelect" class="form-select">
+                    <option value="1d">1 Day</option>
+                    <option value="5d">5 Days</option>
+                    <option value="7d">7 Days</option>
+                    <option value="30d">30 Days</option>
+                    <option value="60d">60 Days</option>
+                    <option value="3mo" selected>3 Months</option>
+                    <option value="6mo">6 Months</option>
+                    <option value="1y">1 Year</option>
+                    <option value="2y">2 Years</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">&nbsp;</label>
+                  <button id="analyzeBtn" class="btn btn-primary w-100" data-bs-toggle="tooltip" title="Scan the current chart for patterns and trading signals">Analyze Patterns</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart and Analysis -->
+      <div class="row g-3">
+        <div class="col-12 col-lg-8">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span data-bs-toggle="tooltip" title="Interactive chart with indicators and automatic pattern detection">Price Chart & Pattern Detection</span>
+              <div>
+                <div class="btn-group me-2" role="group">
+                  <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Choose which indicators to show">
+                    Indicators
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><label class="dropdown-item" title="20‑period Exponential Moving Average shows short‑term trend"><input type="checkbox" id="filterEMA20" checked> EMA 20 (Trend)</label></li>
+                    <li><label class="dropdown-item" title="50‑period Exponential Moving Average shows medium‑term trend"><input type="checkbox" id="filterEMA50" checked> EMA 50 (Trend)</label></li>
+                    <li><label class="dropdown-item" title="Relative Strength Index. 30=oversold, 70=overbought"><input type="checkbox" id="filterRSI" checked> RSI 14 (Entry Timing)</label></li>
+                    <li><label class="dropdown-item" title="MACD shows momentum via fast/slow EMA crossovers"><input type="checkbox" id="filterMACD" checked> MACD (Momentum)</label></li>
+                    <li><label class="dropdown-item" title="Bollinger Bands show volatility and breakout levels"><input type="checkbox" id="filterBollinger" checked> Bollinger Bands</label></li>
+                    <li><label class="dropdown-item" title="Trading volume helps confirm strength of moves"><input type="checkbox" id="filterVolume" checked> Volume</label></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><button class="dropdown-item" id="selectAllIndicators" title="Turn on all indicators">Select All</button></li>
+                    <li><button class="dropdown-item" id="deselectAllIndicators" title="Turn off all indicators">Deselect All</button></li>
+                  </ul>
+                </div>
+                <button id="liveToggle" class="btn btn-sm btn-success" data-live="off" data-bs-toggle="tooltip" title="Auto‑refresh the chart to show the latest candles">Live: Off</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="mainChart" style="height: 500px;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+          <div class="card">
+            <div class="card-header">Pattern Analysis</div>
+            <div class="card-body">
+              <div id="patternAnalysis">
+                <div class="text-center text-muted">
+                  <i class="bi bi-graph-up"></i>
+                  <p>Click "Analyze Patterns" to scan for trading opportunities</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trading Insights -->
+      <div class="row g-3 mt-3">
+        <div class="col-12 col-md-6">
+          <div class="card h-100">
+            <div class="card-header">Trading Signals</div>
+            <div class="card-body" style="height: 300px; overflow-y: auto;">
+              <div id="tradingSignals">
+                <div class="text-center text-muted">
+                  <p>No signals detected</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-md-6">
+          <div class="card mb-3">
+            <div class="card-header">Risk Analysis</div>
+            <div class="card-body">
+              <div id="riskAnalysis">
+                <div class="text-center text-muted">
+                  <p>Complete analysis to see risk metrics</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Key Stats</div>
+            <div class="card-body">
+              <div id="keyStats" class="row g-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <script>
+      window.__SECTOR__ = {{ sector|tojson }};
+      window.__SYMBOL__ = {{ symbol|tojson }};
+      window.__NAME__ = {{ (name or symbol)|tojson }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='chart.js') }}"></script>
+  </body>
+  </html>
+
+

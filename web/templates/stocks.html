@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SectorScope – Stocks: {{ sector }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="SectorScope" style="height:24px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="/">Sectors</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stocks</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/stocks/IT">IT</a></li>
+                <li><a class="dropdown-item" href="/stocks/Pharma">Pharma</a></li>
+                <li><a class="dropdown-item" href="/stocks/Banking">Banking</a></li>
+                <li><a class="dropdown-item" href="/stocks/FMCG">FMCG</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/patterns">Pattern Guide</a></li>
+          </ul>
+          <span class="navbar-text subtle">Current: {{ sector }}</span>
+        </div>
+      </div>
+    </nav>
+    <div class="border-bottom">
+      <div class="container d-flex flex-wrap gap-2 py-2">
+        <a class="btn btn-sm btn-outline-light" href="#filters">Filters</a>
+        <a class="btn btn-sm btn-outline-light" href="#results">Results</a>
+        <div class="ms-auto d-flex gap-2">
+          <button id="quickTop10" class="btn btn-sm btn-primary">Top 10</button>
+          <button id="quickTop20" class="btn btn-sm btn-primary">Top 20</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="container py-4">
+      <div id="filters" class="row g-3 align-items-end">
+        <div class="col-6 col-md-2">
+          <label class="form-label">Min Price</label>
+          <input id="minPrice" type="number" class="form-control" placeholder="0">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">Max Price</label>
+          <input id="maxPrice" type="number" class="form-control" placeholder="0">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Min Avg $ Volume</label>
+          <input id="minADV" type="number" class="form-control" placeholder="10000000">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">Period</label>
+          <select id="period" class="form-select">
+            <option value="3mo" selected>3M</option>
+            <option value="6mo">6M</option>
+            <option value="1y">1Y</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Limit</label>
+          <select id="limit" class="form-select">
+            <option selected>10</option>
+            <option>20</option>
+            <option>50</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+          <button id="searchBtn" class="btn btn-primary">Search</button>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-2">
+        <div class="col-12 col-md-2 d-grid">
+          <button id="exportCsv" class="btn btn-outline-light">Export CSV</button>
+        </div>
+      </div>
+
+      <div id="results" class="row mt-3 g-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Results</div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th class="text-end">Last</th>
+                      <th class="text-end">Avg $Vol</th>
+                      <th class="text-end">1M Return</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+    </main>
+
+    <script>
+      window.__SECTOR__ = {{ sector|tojson }}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='stocks.js') }}"></script>
+  </body>
+  </html>
+
+

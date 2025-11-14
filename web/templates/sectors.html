@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SectorScope – Sectors Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="SectorScope" style="height:24px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="/sectors">Sectors</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stocks</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/stocks/IT">IT</a></li>
+                <li><a class="dropdown-item" href="/stocks/Pharma">Pharma</a></li>
+                <li><a class="dropdown-item" href="/stocks/Banking">Banking</a></li>
+                <li><a class="dropdown-item" href="/stocks/FMCG">FMCG</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/patterns">Pattern Guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+
+    <main class="container py-4">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+          <h2 class="mb-0 section-title">Market Sectors</h2>
+          <small class="subtle">Risk vs Profit: Volatility, CAGR, and trend overview</small>
+        </div>
+        <div class="d-flex gap-2">
+          <select id="chartSelector" class="form-select">
+            <option value="all">All Charts</option>
+            <option value="trends" selected>Sector Trends</option>
+            <option value="returns">Average Returns</option>
+            <option value="distribution">Investment Distribution</option>
+            <option value="risk">Risk vs Growth</option>
+            <option value="performance">Performance Summary</option>
+            <option value="interactive">Interactive Only</option>
+          </select>
+          <select id="period" class="form-select">
+            <option value="1y" selected>1 Year</option>
+            <option value="6mo">6 Months</option>
+            <option value="3mo">3 Months</option>
+          </select>
+          <button id="refresh" class="btn btn-outline-light">Refresh</button>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-xl-7">
+          <!-- Chart 1: Sector Performance Trends -->
+          <div id="trendsChart" class="mb-4">
+            <div class="card">
+              <div class="card-header">📈 Sector Performance Trends</div>
+              <div class="card-body">
+                <div id="chartTrends" style="height: 420px;"></div>
+                <div class="mt-2 small text-secondary">
+                  <strong>Line Chart:</strong> Shows how different sectors have performed over time, helping identify trends and momentum shifts.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 2: Average Returns Comparison -->
+          <div id="returnsChart" class="mb-4">
+            <div class="card h-100">
+              <div class="card-header">📊 Average Returns by Sector</div>
+              <div class="card-body">
+                <div id="chartReturns" style="height: 360px;"></div>
+                <div class="mt-2 small text-secondary">
+                  <strong>Bar Chart:</strong> Compares average returns across sectors to identify top performers.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 3: Investment Distribution -->
+          <div id="distributionChart" class="mb-4">
+            <div class="card h-100">
+              <div class="card-header">🥧 Investment Distribution</div>
+              <div class="card-body">
+                <div id="chartDistribution" style="height: 360px;"></div>
+                <div class="mt-2 small text-secondary">
+                  <strong>Pie Chart:</strong> Shows how investments are distributed across different sectors.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 4: Risk vs Growth Analysis -->
+          <div id="riskChart" class="mb-4">
+            <div class="card">
+              <div class="card-header">🎯 Risk vs Growth Analysis</div>
+              <div class="card-body">
+                <div id="chartRisk" style="height: 360px;"></div>
+                <div class="mt-2 small text-secondary">
+                  <strong>Scatter Plot:</strong> Analyzes the relationship between volatility (risk) and growth potential across sectors.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 5: Sector Performance Summary -->
+          <div id="performanceChart" class="mb-4">
+            <div class="card h-100">
+              <div class="card-header">📋 Sector Performance Summary</div>
+              <div class="card-body">
+                <div id="chartPerformance" style="height: 360px;"></div>
+                <div class="mt-2 small text-secondary">
+                  <strong>Performance Bar:</strong> Quick overview of sector performance metrics.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Chart Section -->
+          <div id="interactiveChart" class="mb-4">
+            <div class="card">
+              <div class="card-header">📈 Live Sector Performance</div>
+              <div class="card-body">
+                <div id="cumChart" style="height: 420px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared Risk & Profit Summary (right column) -->
+        <div class="col-12 col-xl-5">
+          <div id="summarySection" class="card h-100">
+            <div class="card-header">📊 Risk & Profit Summary</div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                  <thead>
+                    <tr>
+                      <th>Sector</th>
+                      <th class="text-end">Volatility</th>
+                      <th class="text-end">CAGR</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="overviewBody"></tbody>
+                </table>
+              </div>
+              <div class="mt-3 small text-secondary">
+                Volatility is daily return standard deviation (proxy for risk). CAGR approximates annual growth.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='sectors.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+  </html>
+
+

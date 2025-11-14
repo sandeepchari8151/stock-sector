@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SectorScope – Sectors & Stocks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="SectorScope" style="height:24px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="/">Sectors</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stocks</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/stocks/IT">IT</a></li>
+                <li><a class="dropdown-item" href="/stocks/Pharma">Pharma</a></li>
+                <li><a class="dropdown-item" href="/stocks/Banking">Banking</a></li>
+                <li><a class="dropdown-item" href="/stocks/FMCG">FMCG</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/patterns">Pattern Guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Sector</label>
+          <select id="sectorSelect" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Stocks (filterable)</label>
+          <select id="stockSelect" class="form-select" multiple size="6"></select>
+          <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+          <button id="loadBtn" class="btn btn-primary">Load Chart</button>
+        </div>
+      </div>
+
+      <div class="row mt-4 g-3">
+        <div class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Top 10 Tradable (Avg $ Volume)</span>
+              <button id="refreshTopBtn" class="btn btn-sm btn-outline-light">Refresh</button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Name</th>
+                      <th class="text-end">Avg $Vol</th>
+                      <th class="text-end">Last</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="topTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6">
+          <div id="chart" class="card h-100">
+            <div class="card-body">
+              <div id="candles" style="height: 520px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div id="chart" class="card">
+            <div class="card-body">
+              <div id="candles" style="height: 520px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+  </body>
+</html>
+
+

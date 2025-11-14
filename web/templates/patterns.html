@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SectorScope – Chart Patterns & Candlesticks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="{{ url_for('static', filename='logo.svg') }}" alt="SectorScope" style="height:24px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="/sectors">Sectors</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stocks</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/stocks/IT">IT</a></li>
+                <li><a class="dropdown-item" href="/stocks/Pharma">Pharma</a></li>
+                <li><a class="dropdown-item" href="/stocks/Banking">Banking</a></li>
+                <li><a class="dropdown-item" href="/stocks/FMCG">FMCG</a></li>
+              </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link active" href="/patterns">Pattern Guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-4">
+      <h2 class="section-title">Pattern Recognition Guide</h2>
+      <p class="subtle">Learn to identify trading patterns and improve your swing trading skills.</p>
+
+      <div class="alert alert-info">
+        <strong>💡 Pro Tip:</strong> For real-time pattern analysis and live trading signals, visit the <a href="/chart/AAPL" class="alert-link">Charts section</a> where you can analyze any stock with live pattern detection.
+      </div>
+
+      <!-- Trading Metrics Guide -->
+      <div class="row g-3 mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Trading Metrics & Signals Explained</div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6>📊 Chart Controls</h6>
+                  <ul class="small">
+                    <li><strong>Symbol</strong>: Stock ticker (e.g., AAPL, TSLA) - identifies which stock to analyze</li>
+                    <li><strong>Timeframe</strong>: Candle duration (1m, 5m, 1h, 1d) - shorter = more detail, longer = bigger picture</li>
+                    <li><strong>Period</strong>: How much history to load (1d to 2y) - more data = better patterns</li>
+                    <li><strong>Live Toggle</strong>: Auto-refresh every 5 seconds to show latest price movements</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6>📈 Technical Indicators</h6>
+                  <ul class="small">
+                    <li><strong>EMA 20/50</strong>: Moving averages showing trend direction and strength</li>
+                    <li><strong>RSI 14</strong>: Momentum oscillator (0-100) - below 30 = oversold, above 70 = overbought</li>
+                    <li><strong>MACD</strong>: Momentum indicator showing trend changes via line crossovers</li>
+                    <li><strong>Bollinger Bands</strong>: Volatility bands - price touching bands = potential reversal</li>
+                    <li><strong>Volume</strong>: Trading activity - higher volume = stronger signal confirmation</li>
+              </ul>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Trading Signals Guide -->
+      <div class="row g-3 mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Trading Signals Explained</div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <h6>🎯 Signal Types</h6>
+                  <ul class="small">
+                    <li><strong>Bullish Trend</strong>: Price > EMA20 > EMA50 - strong uptrend</li>
+                    <li><strong>Bearish Trend</strong>: Price < EMA20 < EMA50 - strong downtrend</li>
+                    <li><strong>RSI Entry Zone</strong>: RSI 30-70 - optimal entry timing</li>
+                    <li><strong>RSI Oversold</strong>: RSI < 30 - strong buy signal</li>
+                    <li><strong>RSI Overbought</strong>: RSI > 70 - strong sell signal</li>
+                    <li><strong>MACD Bullish</strong>: MACD line above signal line - momentum up</li>
+                    <li><strong>MACD Bearish</strong>: MACD line below signal line - momentum down</li>
+                    <li><strong>BB Breakout</strong>: Price breaks upper band with volume - continuation up</li>
+                    <li><strong>BB Breakdown</strong>: Price breaks lower band with volume - continuation down</li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <h6>💰 Trade Parameters</h6>
+                  <ul class="small">
+                    <li><strong>Entry</strong>: Exact price to buy/sell the stock</li>
+                    <li><strong>Stop Loss</strong>: Price to exit if trade goes against you (risk control)</li>
+                    <li><strong>Target</strong>: Price to take profits (reward goal)</li>
+                    <li><strong>R:R (Risk:Reward)</strong>: Ratio of potential profit to potential loss (2:1 = good)</li>
+                    <li><strong>Confidence</strong>: Signal reliability percentage (70%+ = high confidence)</li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <h6>📊 Pattern Recognition</h6>
+                  <ul class="small">
+                    <li><strong>Double Bottom</strong>: Two equal lows - bullish reversal pattern</li>
+                    <li><strong>Double Top</strong>: Two equal highs - bearish reversal pattern</li>
+                    <li><strong>Head & Shoulders</strong>: Three peaks (middle highest) - bearish reversal</li>
+                    <li><strong>Bull Flag</strong>: Sharp rally + shallow pullback - continuation up</li>
+                    <li><strong>Bear Flag</strong>: Sharp decline + weak bounce - continuation down</li>
+                    <li><strong>Triangle</strong>: Converging support/resistance - breakout coming</li>
+              </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Analysis Guide -->
+      <div class="row g-3 mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Risk Analysis & Position Sizing</div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6>⚠️ Risk Metrics</h6>
+                  <ul class="small">
+                    <li><strong>ATR (Average True Range)</strong>: Measures recent price volatility in dollars - higher ATR = more volatile stock</li>
+                    <li><strong>Volatility</strong>: ATR as percentage of price - shows how much stock moves daily</li>
+                    <li><strong>Position Size</strong>: Number of shares to buy based on 1-2% risk rule</li>
+                    <li><strong>Stop Distance</strong>: How far to place stop loss (usually 2x ATR)</li>
+                    <li><strong>Risk per Trade</strong>: Maximum capital to risk on this trade (1-2% recommended)</li>
+              </ul>
+            </div>
+                <div class="col-md-6">
+                  <h6>📈 Key Statistics</h6>
+                  <ul class="small">
+                    <li><strong>Last Price</strong>: Current stock price at market close</li>
+                    <li><strong>Daily Change</strong>: Price change from previous day (positive = up, negative = down)</li>
+                    <li><strong>Volume</strong>: Number of shares traded (M = millions, B = billions)</li>
+                    <li><strong>High Volume</strong>: Above average trading activity - confirms signal strength</li>
+                    <li><strong>Low Volume</strong>: Below average activity - signal may be weak</li>
+              </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trading Rules Guide -->
+      <div class="row g-3 mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Swing Trading Rules & Best Practices</div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <h6>🎯 Entry Rules</h6>
+                  <ul class="small">
+                    <li><strong>Wait for Confirmation</strong>: Don't enter until pattern is complete</li>
+                    <li><strong>Volume Confirmation</strong>: Higher volume on breakout = stronger signal</li>
+                    <li><strong>Multiple Timeframes</strong>: Check higher timeframe for overall trend</li>
+                    <li><strong>Support/Resistance</strong>: Key levels must be respected</li>
+                    <li><strong>Risk First</strong>: Always know your stop loss before entering</li>
+                  </ul>
+                    </div>
+                <div class="col-md-4">
+                  <h6>🛡️ Risk Management</h6>
+                  <ul class="small">
+                    <li><strong>1-2% Rule</strong>: Never risk more than 1-2% of account per trade</li>
+                    <li><strong>Stop Losses</strong>: Always use stops - never hope for recovery</li>
+                    <li><strong>Position Sizing</strong>: Calculate shares based on stop distance</li>
+                    <li><strong>Take Profits</strong>: Target 2:1 or 3:1 risk-reward ratio</li>
+                    <li><strong>Max Drawdown</strong>: Never risk more than 6% total account</li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <h6>📚 Learning Tips</h6>
+                  <ul class="small">
+                    <li><strong>Paper Trade First</strong>: Practice without real money</li>
+                    <li><strong>Keep Records</strong>: Track all trades and outcomes</li>
+                    <li><strong>Start Small</strong>: Use small position sizes while learning</li>
+                    <li><strong>Be Patient</strong>: Wait for high-probability setups</li>
+                    <li><strong>Stay Disciplined</strong>: Follow your rules consistently</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trading Rules -->
+      <div class="row g-3 mt-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">Swing Trading Rules & Risk Management</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Entry Rules</h6>
+                  <ul class="small">
+                    <li><strong>Pattern Completion</strong>: Wait for clear pattern formation</li>
+                    <li><strong>Volume Confirmation</strong>: Higher volume on breakout/breakdown</li>
+                    <li><strong>Support/Resistance</strong>: Key levels must be respected</li>
+                    <li><strong>Trend Alignment</strong>: Pattern should align with overall trend</li>
+                    <li><strong>Multiple Timeframes</strong>: Confirm on higher timeframe</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6>Risk Management</h6>
+                  <ul class="small">
+                    <li><strong>Position Size</strong>: Risk 1-2% of account per trade</li>
+                    <li><strong>Stop Loss</strong>: Place below/above pattern levels</li>
+                    <li><strong>Take Profit</strong>: Target 2:1 or 3:1 risk-reward ratio</li>
+                    <li><strong>Trailing Stops</strong>: Move stops to breakeven after 1:1</li>
+                    <li><strong>Maximum Drawdown</strong>: Never risk more than 6% total</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='patterns.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+  </html>
+
+
