@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Union
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.errors import ConnectionFailure, DuplicateKeyError
+from bson import ObjectId
 import logging
 
 # Load environment variables from .env file if present
@@ -113,6 +114,44 @@ class MongoDBManager:
             # Alerts collection indexes
             self.db.alerts.create_index("created_at")
             self.db.alerts.create_index("is_active")
+            
+            # New schema indexes
+            # Sectors - new schema
+            try:
+                self.db.sectors.create_index("sector_id", unique=True, sparse=True)
+                self.db.sectors.create_index("sector_name")
+            except Exception:
+                pass
+            
+            # Stocks - new schema
+            try:
+                self.db.stocks.create_index("stock_id", unique=True, sparse=True)
+                self.db.stocks.create_index("ticker_symbol", unique=True, sparse=True)
+                self.db.stocks.create_index("sector_id")
+            except Exception:
+                pass
+            
+            # Stock prices - new schema
+            try:
+                self.db.stock_prices.create_index("price_id", unique=True, sparse=True)
+                self.db.stock_prices.create_index([("stock_id", ASCENDING), ("date", ASCENDING)], unique=True, sparse=True)
+            except Exception:
+                pass
+            
+            # Metrics collection indexes
+            try:
+                self.db.metrics.create_index("metric_id", unique=True, sparse=True)
+                self.db.metrics.create_index("stock_id")
+                self.db.metrics.create_index("sector_id")
+                self.db.metrics.create_index("date")
+            except Exception:
+                pass
+            
+            # Sector performance collection indexes
+            try:
+                self.db.sector_performance.create_index("sector_id", unique=True)
+            except Exception:
+                pass
             
             logger.info("Database indexes created successfully")
             
@@ -499,6 +538,230 @@ class MongoDBManager:
         except Exception as e:
             logger.error(f"Error getting latest date from {collection}: {e}")
             return None
+    
+    # ========== NEW SCHEMA METHODS (Matching Table Structure) ==========
+    
+    def insert_sector_new_schema(self, sector_name: str, sector_id: Optional[str] = None) -> str:
+        """
+        Insert sector using new schema (sector_id, sector_name).
+        
+        Args:
+            sector_name: Name of the sector
+            sector_id: Optional sector ID (auto-generated if not provided)
+            
+        Returns:
+            Sector ID
+        """
+        try:
+            if not sector_id:
+                sector_id = str(ObjectId())
+            
+            sector_data = {
+                "sector_id": sector_id,
+                "sector_name": sector_name,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            self.db.sectors.update_one(
+                {"sector_id": sector_id},
+                {"$set": sector_data},
+                upsert=True
+            )
+            return sector_id
+        except Exception as e:
+            logger.error(f"Error inserting sector: {e}")
+            raise
+    
+    def insert_stock_new_schema(self, stock_name: str, ticker_symbol: str, 
+                                sector_id: str, stock_id: Optional[str] = None) -> str:
+        """
+        Insert stock using new schema (stock_id, stock_name, ticker_symbol, sector_id).
+        
+        Args:
+            stock_name: Name of the stock
+            ticker_symbol: Stock ticker symbol
+            sector_id: Sector ID this stock belongs to
+            stock_id: Optional stock ID (auto-generated if not provided)
+            
+        Returns:
+            Stock ID
+        """
+        try:
+            if not stock_id:
+                stock_id = str(ObjectId())
+            
+            stock_data = {
+                "stock_id": stock_id,
+                "stock_name": stock_name,
+                "ticker_symbol": ticker_symbol,
+                "sector_id": sector_id,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            self.db.stocks.update_one(
+                {"stock_id": stock_id},
+                {"$set": stock_data},
+                upsert=True
+            )
+            return stock_id
+        except Exception as e:
+            logger.error(f"Error inserting stock: {e}")
+            raise
+    
+    def insert_daily_price_new_schema(self, stock_id: str, date: datetime, 
+                                      open_price: float, high_price: float,
+                                      low_price: float, close_price: float,
+                                      volume: int, price_id: Optional[str] = None) -> str:
+        """
+        Insert daily price using new schema.
+        
+        Args:
+            stock_id: Stock ID
+            date: Trading date
+            open_price: Opening price
+            high_price: Highest price
+            low_price: Lowest price
+            close_price: Closing price
+            volume: Trading volume
+            price_id: Optional price ID (auto-generated if not provided)
+            
+        Returns:
+            Price ID
+        """
+        try:
+            if not price_id:
+                price_id = str(ObjectId())
+            
+            price_data = {
+                "price_id": price_id,
+                "stock_id": stock_id,
+                "date": date,
+                "open_price": open_price,
+                "high_price": high_price,
+                "low_price": low_price,
+                "close_price": close_price,
+                "volume": volume,
+                "created_at": datetime.utcnow()
+            }
+            
+            self.db.stock_prices.update_one(
+                {"price_id": price_id},
+                {"$set": price_data},
+                upsert=True
+            )
+            return price_id
+        except Exception as e:
+            logger.error(f"Error inserting daily price: {e}")
+            raise
+    
+    def insert_metric_new_schema(self, daily_return: float, volatility: Optional[float] = None,
+                                 trend: Optional[str] = None, stock_id: Optional[str] = None,
+                                 sector_id: Optional[str] = None, date: Optional[datetime] = None,
+                                 metric_id: Optional[str] = None) -> str:
+        """
+        Insert metric using new schema.
+        
+        Args:
+            daily_return: Daily return value
+            volatility: Volatility value (optional)
+            trend: Trend value (up/down/neutral)
+            stock_id: Stock ID (if metric is for a stock)
+            sector_id: Sector ID (if metric is for a sector)
+            date: Date of the metric
+            metric_id: Optional metric ID (auto-generated if not provided)
+            
+        Returns:
+            Metric ID
+        """
+        try:
+            if not metric_id:
+                metric_id = str(ObjectId())
+            
+            if not trend:
+                trend = "up" if daily_return > 0 else "down" if daily_return < 0 else "neutral"
+            
+            metric_data = {
+                "metric_id": metric_id,
+                "daily_return": daily_return,
+                "volatility": volatility,
+                "trend": trend,
+                "date": date or datetime.utcnow(),
+                "created_at": datetime.utcnow()
+            }
+            
+            if stock_id:
+                metric_data["stock_id"] = stock_id
+            if sector_id:
+                metric_data["sector_id"] = sector_id
+            
+            self.db.metrics.update_one(
+                {"metric_id": metric_id},
+                {"$set": metric_data},
+                upsert=True
+            )
+            return metric_id
+        except Exception as e:
+            logger.error(f"Error inserting metric: {e}")
+            raise
+    
+    def upsert_sector_performance(self, sector_id: str, avg_return: float,
+                                  best_stock: Optional[str] = None,
+                                  worst_stock: Optional[str] = None,
+                                  comparison_value: Optional[float] = None) -> bool:
+        """
+        Insert or update sector performance.
+        
+        Args:
+            sector_id: Sector ID
+            avg_return: Average return of the sector
+            best_stock: Best performing stock symbol
+            worst_stock: Worst performing stock symbol
+            comparison_value: Comparison value (CAGR, Sharpe ratio, etc.)
+            
+        Returns:
+            True if successful
+        """
+        try:
+            performance_data = {
+                "sector_id": sector_id,
+                "avg_return": avg_return,
+                "best_stock": best_stock,
+                "worst_stock": worst_stock,
+                "comparison_value": comparison_value,
+                "updated_at": datetime.utcnow()
+            }
+            
+            self.db.sector_performance.update_one(
+                {"sector_id": sector_id},
+                {"$set": performance_data},
+                upsert=True
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Error upserting sector performance: {e}")
+            return False
+    
+    def get_sector_performance(self, sector_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Get sector performance data.
+        
+        Args:
+            sector_id: Optional sector ID filter
+            
+        Returns:
+            List of sector performance dictionaries
+        """
+        try:
+            query = {}
+            if sector_id:
+                query["sector_id"] = sector_id
+            
+            return list(self.db.sector_performance.find(query, {"_id": 0}))
+        except Exception as e:
+            logger.error(f"Error getting sector performance: {e}")
+            return []
 
 
 def get_mongodb_manager() -> MongoDBManager:

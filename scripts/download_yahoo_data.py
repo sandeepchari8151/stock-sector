@@ -131,12 +131,12 @@ def download_all_sectors() -> None:
     if successful_downloads == total_downloads:
         print("🎉 All downloads successful!")
         print(f"\nNext steps:")
-        print(f"1. Update stock_sector_performance.py to use these files:")
+        print(f"1. Use these files with main.py or data_collection.py:")
         print(f"   YAHOO_CSV_PATHS = {{")
         for sector_name in SECTOR_SYMBOLS.keys():
             print(f'       "{sector_name}": "data/{sector_name}.csv",')
         print(f"   }}")
-        print(f"2. Run: python stock_sector_performance.py")
+        print(f"2. Run: python main.py")
     else:
         print("⚠️  Some downloads failed. Check the error messages above.")
 

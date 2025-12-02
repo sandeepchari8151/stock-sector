@@ -22,7 +22,6 @@ stock project/
 ├── visualization.py            # Charts, heatmaps, dashboards
 ├── insights_reporting.py       # Analysis, insights, reports
 ├── download_yahoo_data.py      # Standalone data downloader
-├── stock_sector_performance.py # Original monolithic script
 ├── data/                       # Data storage folder
 │   ├── IT.csv
 │   ├── Pharma.csv
@@ -48,12 +47,7 @@ python main.py
 
 ### Option 2: Download Data Only
 ```bash
-python download_yahoo_data.py
-```
-
-### Option 3: Use Original Script
-```bash
-python stock_sector_performance.py
+python scripts/download_yahoo_data.py
 ```
 
 ## 📊 What You Get
@@ -257,6 +251,4 @@ The application uses MongoDB for all data storage. Follow these steps to set up:
 
 ### Database Management
 
-- **Setup database:** `python scripts/setup_mongodb_atlas.py`
 - **View database status:** `python scripts/mongodb_dashboard.py`
-- **Migrate CSV data:** `python scripts/migrate_csv_to_mongodb.py`
